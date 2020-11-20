@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+<style>
+    /* mirror the image */
+
+    video,
+    canvas {
+        transform: scale(-1, 1);
+        /*For Firefox (& IE) */
+        -webkit-transform: scale(-1, 1);
+        /*for Chrome & Opera (& Safari) */
+    }
+</style>
+
+
+</head>
+<body>
+<p>hello world</p>
+<video id="v" autoplay></video>
+<canvas id="myCanvas" >
+Your browser does not support the HTML5 canvas tag.
+</canvas>
+<button id="b">submit</button>
+<form  method="POST">
+    name<input type="text" name="name" id="name1">
+    password<input type="text" name="pass" id="pass1">
+    <button type="button"   onclick="senddata()">submit</button>
+</form>
+
+ <script>
+
+      let v=document.getElementById("v");
+      let b=document.getElementById("b");
+      let imagecanvas=document.getElementById('myCanvas');
+      let cntx=imagecanvas.getContext("2d");
+
+       function senddata()
+        {
+            var name=document.getElementById("name1").value;
+            var pass=document.getElementById("pass1").value;
+            console.log(name+" ==="+pass);
+            var xmlhttp=new XMLHttpRequest();
+            xmlhttp.onreadystatechange = function() {
+                if(xmlhttp.readyState == 4 && xmlhttp.status == 200)
+                {
+                    console.log(this.responseText);
+                    document.getElementById("name1").value=xmlhttp.responseText;
+
+                }
+            };
+            xmlhttp.open("POST","/jsoninput",true);
+            data={"name":name,"pass":pass};
+            var form =new FormData;
+            form.append("name",name);
+            form.append("pass",pass);
+            xmlhttp.send(form);
+
+
+        }
+
+
+      function postFile(file)
+          {
+          var xmlhttp=new XMLHttpRequest();
+          xmlhttp.open("POST","/imageinput",true);
+          xmlhttp.onreadystatechange=Function()
+          {
+            if(xmlhttp.readyState == 4 && xmlhttp.status == 200)
+                {
+                    console.log(this.responseText);
+              }
+          };
+         form=new FormData;
+
+         form.append("image",file);
+         xmlhttp.send(form);
+          }
+
+      function  sendvideo(){
+
+          imagecanvas.width=v.videoWidth;
+          imagecanvas.height=v.videoHeight;
+
+          cntx.drawImage(v,0,0,imagecanvas.width,imagecanvas.height);
+
+
+          imagecanvas.toBlob(postFile,'image/jpeg');
+
+
+
+      }
+      b.onclick = function(){
+
+           sendvideo();
+      };
+      window.onload=function () {
+        navigator.mediaDevices.getUserMedia({video:{width: 1280, height: 720 },audio:false})
+            .then(stream =>
+            {console.log("stream");
+            v.srcObject= stream;
+            }).catch(err=>{console.log(err);});
+
+      };
+
+    </script>
+</body>
+</html>
